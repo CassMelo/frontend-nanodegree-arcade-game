@@ -140,11 +140,11 @@ var Engine = (function(global) {
         }
 
 
-        //*********************teste SCORE ***************************
-        score.print();
-        // ***********************************************
+        //prints the game numbers
+        game.printNumbers();
 
-        renderEntities();
+
+       renderEntities();
     }
 
     /* This function is called by the render function and is called on each game

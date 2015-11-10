@@ -1,15 +1,17 @@
 
+//**********************************************
 // Enemies our player must avoid
-var Enemy = function(x,y) {
-    // Variables applied to each of our instances go here,
-    // we've provided one for you to get started
+//**********************************************
+var Enemy = function(x,y,speed) {
+    // Variables applied to each of our instances go here
 
-    // The image/sprite for our enemies, this uses
-    // a helper we've provided to easily load images
+    // The image/sprite for our enemies, this uses a helper
+    // to load de file from resourses.js
     this.sprite = 'images/enemy-bug.png';
     this.x = x;
     this.y = y;
-    this.speed = 200;
+    this.speed = speed;
+    this.collisionArea = 60;
 };
 
 // Update the enemy's position, required method for game
@@ -18,7 +20,6 @@ Enemy.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
-
 
     if (this.x < 480 ) {
         this.x += this.speed*dt;
@@ -33,56 +34,64 @@ Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
+// Check when the player colides with an enemy
 Enemy.prototype.checkCollisions = function() {
 
-    if (player.x < this.x + 60 &&
-     player.x + 60 > this.x &&
-     player.y < this.y + 60 &&
-     player.y + 60 > this.y   ) {
+
+    if (player.x < this.x + this.collisionArea &&
+     player.x + this.collisionArea > this.x &&
+     player.y < this.y + this.collisionArea &&
+     player.y + this.collisionArea > this.y   ) {
 
         colideSound.play();
-        score.update(-20);
+        game.updateScore(-20);
         player.reset();
     }
 };
 
 
 
-// Now write your own player class
-// This class requires an update(), render() and
-// a handleInput() method.
-
-var Player = function(x,y){
+//**********************************************
+// Player of the game
+//**********************************************
+var Player = function(){
     this.sprite = 'images/char-princess-girl.png';
-    this.x = x;
-    this.y = y;
-    this.distanceX = 101; // width of the player
-    this.distanceY = 83; // height of the player
+    // initial position for the player
+    this.beginX = 200;
+    this.beginY = 415;
+    // widht and height helps the player to move
+    this.width = 101;
+    this.height = 83;
+    this.x = this.beginX;
+    this.y = this.beginY
 };
 
 Player.prototype.update = function(dt) {
-    //ctx.drawImage(Resources.get(this.sprite), 200, 200);
+    player.render();
 };
 
+// Draw the player on the screen, required method for game
 Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
+// Make all the changes needed when the player goes to the water (win the game)
 Player.prototype.won = function() {
-
     winSound.play();
-    score.update(100);
+    game.updateScore(800);
     this.reset();
 };
 
+// Moves the player to the position at the beginnig of the
+// game
 Player.prototype.reset = function() {
-    this.x = 200;
-    this.y = 415;
+    this.x = this.beginX;
+    this.y = this.beginY;
     this.render();
 };
 
 
-
+// Moves the player according with the keys (up, down, left, right)
 Player.prototype.handleInput = function(key){
 
         // 404 = canvas - distanceX
@@ -91,28 +100,28 @@ Player.prototype.handleInput = function(key){
         // checks if the player's next position is going to be inside the canvas
         // if, not moves the player to the far rigth position
         if (this.x > 0) {
-            this.x = this.x - this.distanceX;
+            this.x -=  this.width;
         } else {
             this.x = 404;
         }
-        this.render();
+        this.update();
     }
 
     if (key === 'right') {
         // checks if the player's next position is going to be inside the canvas
         // if, not moves the player to the far left position
         if (this.x < 404) {
-            this.x = this.x + this.distanceX;
+            this.x += this.width;
         } else {
             this.x = 0;
         }
-        this.render();
+        this.update();
     }
 
 
     if (key === 'up') {
-        this.y = this.y - this.distanceY;
-        this.render();
+        this.y -= this.height;
+        this.update();
 
         // if the player gets to the water, wins the game
         if (this.y < 83) {
@@ -124,62 +133,135 @@ Player.prototype.handleInput = function(key){
     if (key === 'down') {
         // if the player wants to go down makes sure he doesn't
         // leave the canvas
-        if (this.y < 410) {
-            this.y = this.y + this.distanceY;
+        if (this.y < 415) {
+            this.y += this.height;
         } else {
-            this.y = 410;
+            this.y = 415;
         }
-        this.render();
+        this.update();
+    }
+};
+
+
+//**********************************************
+// Numbers of the game
+//**********************************************
+var Game = function() {
+    this.score = 0;
+    this.level = 1
+};
+
+
+// Update the score
+Game.prototype.updateScore = function(x) {
+
+    this.score = this.score + x;
+    if (this.score / 1000 > this.level) {
+        this.changeLevel();
     }
 
 };
 
-
-
-
-// Soore of the game
-var Score = function() {
-    this.value = 0;
-};
-
-// Update the score
-Score.prototype.update = function(x) {
-
-    this.value = this.value + x;
-};
-
-
-Score.prototype.print = function() {
+// Prints the score
+Game.prototype.printScore = function() {
 
     ctx.fillStyle = "white";
     ctx.font="30px Impact";
     ctx.textAlign = "right";
     ctx.strokeStyle = "black";
-    ctx.fillText(this.value, 500, 100);
-    ctx.strokeText(this.value, 500, 100);
+    ctx.fillText(this.score, 500, 100);
+    ctx.strokeText(this.score, 500, 100);
 };
 
 
+
+// Change the level's game
+Game.prototype.changeLevel = function() {
+
+    this.level = this.level + 1;
+
+    switch(this.level) {
+        case 2:
+            allEnemies.push(new Enemy(80, 150, 300));
+            break;
+        case 3:
+            //allEnemies.push(new Enemy(180, 100, 320));
+            break;
+        case 4:
+            allEnemies.push(new Enemy(100, 180, 220));
+            break;
+        case 5:
+            //allEnemies.push(new Enemy(200, 190, 400));
+            break;
+        case 6:
+            allEnemies.push(new Enemy(300, 230, 320));
+            break;
+        case 7:
+            //allEnemies.push(new Enemy(50, 80, 250));
+            break;
+        case 8:
+            this.endGame();
+            break;
+    }
+};
+
+
+// Initializar game, set level, player and enemies
+Game.prototype.initGame = function() {
+
+    allEnemies.push(new Enemy(10, 230, 200));
+    allEnemies.push(new Enemy(100, 60, 250));
+    game.score = 0;
+    game.level = 1;
+    // deletar os enemies;
+    allEnemies.splice(1,allEnemies.length -2);
+};
+
+
+// Initializar game, set level, player and enemies
+Game.prototype.endGame = function() {
+
+    var r = alert("Game Over !!!! Start over ?");
+    this.initGame();
+};
+
+// Prints the level's game
+Game.prototype.printLevel = function() {
+
+    ctx.fillStyle = "white";
+    ctx.font="30px Impact";
+    ctx.textAlign = "right";
+    ctx.strokeStyle = "black";
+    ctx.fillText(this.level, 50, 100);
+    ctx.strokeText(this.level, 50, 100);
+};
+
+// Prints the score
+Game.prototype.printNumbers = function() {
+
+    this.printScore();
+    this.printLevel();
+};
+
+
+
+
+//**********************************************
 // Now instantiate your objects.
+//**********************************************
 
 // DEPOIS PASSAR A GERAR NUMEROS RANDOMICOS ENTRE 0 - 505 PARA O X E 50 E 230 PARA O Y.
-// Place all enemy objects in an array called allEnemies
 
-// sound source http://soundbible.com/tags-game.html
 var winSound = new Audio('sounds/win.wav');
 var colideSound = new Audio('sounds/colide.wav');
-var score = new Score();
-
+var game = new Game();
 var allEnemies = [];
-allEnemies.push(new Enemy(10, 230));
-allEnemies.push(new Enemy(100, 50));
-allEnemies.push(new Enemy(250, 100));
-allEnemies.push(new Enemy(350, 161));
-//allEnemies.push(new Enemy(80, 140));
+var player = new Player();
 
-// Place the player object in a variable called player
-var player = new Player(202,415);
-//beginSound.play();
+
+game.initGame();
+
+
 
 
 // This listens for key presses and sends the keys to your
