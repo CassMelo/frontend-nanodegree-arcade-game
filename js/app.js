@@ -1,11 +1,15 @@
+
 // Enemies our player must avoid
-var Enemy = function() {
+var Enemy = function(x,y) {
     // Variables applied to each of our instances go here,
     // we've provided one for you to get started
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
     this.sprite = 'images/enemy-bug.png';
+    this.x = x;
+    this.y = y;
+    this.speed = 200;
 };
 
 // Update the enemy's position, required method for game
@@ -14,6 +18,14 @@ Enemy.prototype.update = function(dt) {
     // You should multiply any movement by the dt parameter
     // which will ensure the game runs at the same speed for
     // all computers.
+
+
+    if (this.x < 480 ) {
+        this.x += this.speed*dt;
+    } else {
+        this.x = 0;
+    }
+    this.render();
 };
 
 // Draw the enemy on the screen, required method for game
@@ -21,20 +33,158 @@ Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
+Enemy.prototype.checkCollisions = function() {
+
+    if (player.x < this.x + 60 &&
+     player.x + 60 > this.x &&
+     player.y < this.y + 60 &&
+     player.y + 60 > this.y   ) {
+
+        colideSound.play();
+        score.update(-20);
+        player.reset();
+    }
+};
+
+
+
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
 
+var Player = function(x,y){
+    this.sprite = 'images/char-princess-girl.png';
+    this.x = x;
+    this.y = y;
+    this.distanceX = 101; // width of the player
+    this.distanceY = 83; // height of the player
+};
+
+Player.prototype.update = function(dt) {
+    //ctx.drawImage(Resources.get(this.sprite), 200, 200);
+};
+
+Player.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+
+Player.prototype.won = function() {
+
+    winSound.play();
+    score.update(100);
+    this.reset();
+};
+
+Player.prototype.reset = function() {
+    this.x = 200;
+    this.y = 415;
+    this.render();
+};
+
+
+
+Player.prototype.handleInput = function(key){
+
+        // 404 = canvas - distanceX
+
+    if (key === 'left') {
+        // checks if the player's next position is going to be inside the canvas
+        // if, not moves the player to the far rigth position
+        if (this.x > 0) {
+            this.x = this.x - this.distanceX;
+        } else {
+            this.x = 404;
+        }
+        this.render();
+    }
+
+    if (key === 'right') {
+        // checks if the player's next position is going to be inside the canvas
+        // if, not moves the player to the far left position
+        if (this.x < 404) {
+            this.x = this.x + this.distanceX;
+        } else {
+            this.x = 0;
+        }
+        this.render();
+    }
+
+
+    if (key === 'up') {
+        this.y = this.y - this.distanceY;
+        this.render();
+
+        // if the player gets to the water, wins the game
+        if (this.y < 83) {
+            player.won();
+        }
+    }
+
+
+    if (key === 'down') {
+        // if the player wants to go down makes sure he doesn't
+        // leave the canvas
+        if (this.y < 410) {
+            this.y = this.y + this.distanceY;
+        } else {
+            this.y = 410;
+        }
+        this.render();
+    }
+
+};
+
+
+
+
+// Soore of the game
+var Score = function() {
+    this.value = 0;
+};
+
+// Update the score
+Score.prototype.update = function(x) {
+
+    this.value = this.value + x;
+};
+
+
+Score.prototype.print = function() {
+
+    ctx.fillStyle = "white";
+    ctx.font="30px Impact";
+    ctx.textAlign = "right";
+    ctx.strokeStyle = "black";
+    ctx.fillText(this.value, 500, 100);
+    ctx.strokeText(this.value, 500, 100);
+};
+
 
 // Now instantiate your objects.
-// Place all enemy objects in an array called allEnemies
-// Place the player object in a variable called player
 
+// DEPOIS PASSAR A GERAR NUMEROS RANDOMICOS ENTRE 0 - 505 PARA O X E 50 E 230 PARA O Y.
+// Place all enemy objects in an array called allEnemies
+
+// sound source http://soundbible.com/tags-game.html
+var winSound = new Audio('sounds/win.wav');
+var colideSound = new Audio('sounds/colide.wav');
+var score = new Score();
+
+var allEnemies = [];
+allEnemies.push(new Enemy(10, 230));
+allEnemies.push(new Enemy(100, 50));
+allEnemies.push(new Enemy(250, 100));
+allEnemies.push(new Enemy(350, 161));
+//allEnemies.push(new Enemy(80, 140));
+
+// Place the player object in a variable called player
+var player = new Player(202,415);
+//beginSound.play();
 
 
 // This listens for key presses and sends the keys to your
 // Player.handleInput() method. You don't need to modify this.
-document.addEventListener('keyup', function(e) {
+document.addEventListener('keydown', function(e) {
     var allowedKeys = {
         37: 'left',
         38: 'up',
@@ -42,5 +192,5 @@ document.addEventListener('keyup', function(e) {
         40: 'down'
     };
 
-    player.handleInput(allowedKeys[e.keyCode]);
+     player.handleInput(allowedKeys[e.keyCode]);
 });
