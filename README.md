@@ -1,18 +1,17 @@
 frontend-nanodegree-arcade-game
 ===============================
 
-========================
-= How to load the game =
-========================
+This is an arcade game called Frogger developed during the Front end Web Developer course by Udacity.
+
+
+#Installation
 
 To load the game you need to open the file /frontend-nanodegree-arcade-game/index.html 
 on your browser.
 
 
 
-========================
-= How to play the game =
-========================
+#How to play the game
 
 The player moves up, down, right and left using the arrows on the keyboard.
 
@@ -28,3 +27,6 @@ You'll have more bugs coming or they can come faster.
  
 
 Enjoy the game !!!
+
+
+
