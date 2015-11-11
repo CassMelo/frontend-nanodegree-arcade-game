@@ -166,7 +166,7 @@ Player.prototype.handleInput = function(key){
 //**********************************************
 var Game = function() {
     this.score = 0;
-    this.level = 1
+    this.level = 1;
 };
 
 
