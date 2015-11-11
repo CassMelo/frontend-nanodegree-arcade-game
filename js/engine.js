@@ -29,6 +29,7 @@ var Engine = (function(global) {
     canvas.height = 606;
     doc.body.appendChild(canvas);
 
+
     /* This function serves as the kickoff point for the game loop itself
      * and handles properly calling the update and render methods.
      */
@@ -59,7 +60,8 @@ var Engine = (function(global) {
         win.requestAnimationFrame(main);
     }
 
-    /* This function does some initial setup that should only occur once,
+
+     /* This function does some initial setup that should only occur once,
      * particularly setting the lastTime variable that is required for the
      * game loop.
      */
@@ -98,6 +100,7 @@ var Engine = (function(global) {
             enemy.update(dt);
         });
         player.update();
+
     }
 
     /* This function initially draws the "game level", it will then call
@@ -183,7 +186,10 @@ var Engine = (function(global) {
         'images/char-cat-girl.png',
         'images/char-horn-girl.png',
         'images/char-pink-girl.png',
-        'images/char-princess-girl.png'
+        'images/char-princess-girl.png',
+        'images/Gem Blue.png',
+        'images/Gem Green.png',
+        'images/Gem Orange.png'
     ]);
     Resources.onReady(init);
 

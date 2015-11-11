@@ -1,18 +1,38 @@
+//**********************************************************
+// Any Graphic Object in the game: Enemies, Player
+//**********************************************************
+
+var GraphicObject = function(sprite,x,y) {
+    // The image/sprite for our graphic object, this uses a helper
+    // to load de file from resourses.js
+
+    this.sprite = sprite;
+    this.x = x;
+    this.y = y;
+};
+
+
+GraphicObject.prototype.render = function() {
+    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+};
+
+
+
 
 //**********************************************
 // Enemies our player must avoid
 //**********************************************
 var Enemy = function(x,y,speed) {
-    // Variables applied to each of our instances go here
 
-    // The image/sprite for our enemies, this uses a helper
-    // to load de file from resourses.js
-    this.sprite = 'images/enemy-bug.png';
-    this.x = x;
-    this.y = y;
+    GraphicObject.call(this,'images/enemy-bug.png',x,y);
     this.speed = speed;
     this.collisionArea = 60;
 };
+
+Enemy.prototype = Object.create(GraphicObject.prototype);
+Enemy.prototype.constructor = Enemy;
+
+
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
@@ -29,10 +49,6 @@ Enemy.prototype.update = function(dt) {
     this.render();
 };
 
-// Draw the enemy on the screen, required method for game
-Enemy.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-};
 
 // Check when the player colides with an enemy
 Enemy.prototype.checkCollisions = function() {
@@ -43,42 +59,44 @@ Enemy.prototype.checkCollisions = function() {
      player.y < this.y + this.collisionArea &&
      player.y + this.collisionArea > this.y   ) {
 
+        // make a sound when the collision happens
         colideSound.play();
+
+        // when the player collides with a bug it lose points
         game.updateScore(-20);
         player.reset();
     }
 };
 
 
-
 //**********************************************
 // Player of the game
 //**********************************************
 var Player = function(){
-    this.sprite = 'images/char-princess-girl.png';
+
     // initial position for the player
-    this.beginX = 200;
+    this.beginX = 202;
     this.beginY = 415;
     // widht and height helps the player to move
     this.width = 101;
     this.height = 83;
-    this.x = this.beginX;
-    this.y = this.beginY
+    GraphicObject.call(this,'images/char-princess-girl.png',this.beginX ,this.beginY);
 };
 
+
+Player.prototype = Object.create(GraphicObject.prototype);
+Player.prototype.constructor = Player;
+
+// update the player on the screen
 Player.prototype.update = function(dt) {
-    player.render();
+    this.render();
 };
 
-// Draw the player on the screen, required method for game
-Player.prototype.render = function() {
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-};
 
 // Make all the changes needed when the player goes to the water (win the game)
-Player.prototype.won = function() {
+Player.prototype.score = function() {
     winSound.play();
-    game.updateScore(800);
+    game.updateScore(100);
     this.reset();
 };
 
@@ -98,22 +116,22 @@ Player.prototype.handleInput = function(key){
 
     if (key === 'left') {
         // checks if the player's next position is going to be inside the canvas
-        // if, not moves the player to the far rigth position
+        // if not, keeps the player to the far left position
         if (this.x > 0) {
             this.x -=  this.width;
         } else {
-            this.x = 404;
+            this.x = 0;
         }
         this.update();
     }
 
     if (key === 'right') {
         // checks if the player's next position is going to be inside the canvas
-        // if, not moves the player to the far left position
+        // if not, keeps the player to the far right position
         if (this.x < 404) {
             this.x += this.width;
         } else {
-            this.x = 0;
+            this.x = 404;
         }
         this.update();
     }
@@ -125,7 +143,7 @@ Player.prototype.handleInput = function(key){
 
         // if the player gets to the water, wins the game
         if (this.y < 83) {
-            player.won();
+            this.score();
         }
     }
 
@@ -133,10 +151,10 @@ Player.prototype.handleInput = function(key){
     if (key === 'down') {
         // if the player wants to go down makes sure he doesn't
         // leave the canvas
-        if (this.y < 415) {
+        if (this.y < this.beginY) {
             this.y += this.height;
         } else {
-            this.y = 415;
+            this.y = this.beginY;
         }
         this.update();
     }
@@ -169,8 +187,8 @@ Game.prototype.printScore = function() {
     ctx.font="30px Impact";
     ctx.textAlign = "right";
     ctx.strokeStyle = "black";
-    ctx.fillText(this.score, 500, 100);
-    ctx.strokeText(this.score, 500, 100);
+    ctx.fillText(this.score, 490, 100);
+    ctx.strokeText(this.score, 490, 100);
 };
 
 
@@ -185,19 +203,19 @@ Game.prototype.changeLevel = function() {
             allEnemies.push(new Enemy(80, 150, 300));
             break;
         case 3:
-            //allEnemies.push(new Enemy(180, 100, 320));
-            break;
-        case 4:
             allEnemies.push(new Enemy(100, 180, 220));
             break;
+        case 4:
+            allEnemies[2].speed = allEnemies[2].speed * 1.2;
+            break;
         case 5:
-            //allEnemies.push(new Enemy(200, 190, 400));
+            allEnemies[0].speed = allEnemies[0].speed * 1.3;
             break;
         case 6:
             allEnemies.push(new Enemy(300, 230, 320));
             break;
         case 7:
-            //allEnemies.push(new Enemy(50, 80, 250));
+            allEnemies[1].speed = allEnemies[1].speed * 1.5;
             break;
         case 8:
             this.endGame();
@@ -209,19 +227,22 @@ Game.prototype.changeLevel = function() {
 // Initializar game, set level, player and enemies
 Game.prototype.initGame = function() {
 
+    // clear allEnemies array
+
+    allEnemies.splice(0,allEnemies.length);
+
     allEnemies.push(new Enemy(10, 230, 200));
-    allEnemies.push(new Enemy(100, 60, 250));
+    allEnemies.push(new Enemy(150, 80, 180));
+
     game.score = 0;
     game.level = 1;
-    // deletar os enemies;
-    allEnemies.splice(1,allEnemies.length -2);
 };
 
 
 // Initializar game, set level, player and enemies
 Game.prototype.endGame = function() {
 
-    var r = alert("Game Over !!!! Start over ?");
+    var r = alert("Game Over !!!! Play again ?");
     this.initGame();
 };
 
@@ -232,8 +253,10 @@ Game.prototype.printLevel = function() {
     ctx.font="30px Impact";
     ctx.textAlign = "right";
     ctx.strokeStyle = "black";
-    ctx.fillText(this.level, 50, 100);
-    ctx.strokeText(this.level, 50, 100);
+    ctx.fillText("L: " + this.level, 50, 100);
+    ctx.strokeText("L: " + this.level, 50, 100);
+
+
 };
 
 // Prints the score
@@ -241,6 +264,7 @@ Game.prototype.printNumbers = function() {
 
     this.printScore();
     this.printLevel();
+
 };
 
 
@@ -257,6 +281,8 @@ var colideSound = new Audio('sounds/colide.wav');
 var game = new Game();
 var allEnemies = [];
 var player = new Player();
+
+
 
 
 game.initGame();
@@ -276,3 +302,5 @@ document.addEventListener('keydown', function(e) {
 
      player.handleInput(allowedKeys[e.keyCode]);
 });
+
+
