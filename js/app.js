@@ -1,6 +1,6 @@
-//**********************************************************
-// Any Graphic Object in the game: Enemies, Player
-//**********************************************************
+/** ********************************************************
+* Any Graphic Object in the game: Enemies, Player
+***********************************************************/
 
 var GraphicObject = function(sprite,x,y) {
     // The image/sprite for our graphic object, this uses a helper
@@ -19,9 +19,9 @@ GraphicObject.prototype.render = function() {
 
 
 
-//**********************************************
-// Enemies our player must avoid
-//**********************************************
+/** *********************************************
+* Enemies our player must avoid
+************************************************/
 var Enemy = function(x,y,speed) {
 
     GraphicObject.call(this,'images/enemy-bug.png',x,y);
@@ -34,12 +34,12 @@ Enemy.prototype.constructor = Enemy;
 
 
 
-// Update the enemy's position, required method for game
-// Parameter: dt, a time delta between ticks
+/** Update the enemy's position, required method for game
+* Parameter: dt, a time delta between ticks */
 Enemy.prototype.update = function(dt) {
-    // You should multiply any movement by the dt parameter
-    // which will ensure the game runs at the same speed for
-    // all computers.
+    /** You should multiply any movement by the dt parameter
+    * which will ensure the game runs at the same speed for
+    * all computers. */
 
     if (this.x < 480 ) {
         this.x += this.speed*dt;
@@ -50,7 +50,7 @@ Enemy.prototype.update = function(dt) {
 };
 
 
-// Check when the player colides with an enemy
+/** Check when the player colides with an enemy */
 Enemy.prototype.checkCollisions = function() {
 
 
@@ -59,27 +59,24 @@ Enemy.prototype.checkCollisions = function() {
      player.y < this.y + this.collisionArea &&
      player.y + this.collisionArea > this.y   ) {
 
-        // make a sound when the collision happens
+        /** make a sound when the collision happens */
         colideSound.play();
 
-        // when the player collides with a bug it lose points
+        /** when the player collides with a bug it lose points */
         game.updateScore(-20);
         player.reset();
     }
 };
 
 
-//**********************************************
-// Player of the game
-//**********************************************
+/** **********************************************
+* Player of the game
+*************************************************/
 var Player = function(){
 
-    // initial position for the player
+    /** initial position for the player */
     this.beginX = 202;
     this.beginY = 415;
-    // widht and height helps the player to move
-    this.width = 101;
-    this.height = 83;
     GraphicObject.call(this,'images/char-princess-girl.png',this.beginX ,this.beginY);
 };
 
@@ -87,21 +84,19 @@ var Player = function(){
 Player.prototype = Object.create(GraphicObject.prototype);
 Player.prototype.constructor = Player;
 
-// update the player on the screen
+/** update the player on the screen */
 Player.prototype.update = function(dt) {
-    this.render();
 };
 
 
-// Make all the changes needed when the player goes to the water (win the game)
+/** Make all the changes needed when the player goes to the water (win the game) */
 Player.prototype.score = function() {
     winSound.play();
     game.updateScore(100);
     this.reset();
 };
 
-// Moves the player to the position at the beginnig of the
-// game
+/** Moves the player to the position at the beginnig of the game */
 Player.prototype.reset = function() {
     this.x = this.beginX;
     this.y = this.beginY;
@@ -109,16 +104,15 @@ Player.prototype.reset = function() {
 };
 
 
-// Moves the player according with the keys (up, down, left, right)
+/** Moves the player according with the keys (up, down, left, right) */
 Player.prototype.handleInput = function(key){
 
-        // 404 = canvas - distanceX
 
     if (key === 'left') {
-        // checks if the player's next position is going to be inside the canvas
-        // if not, keeps the player to the far left position
+        /** checks if the player's next position is going to be inside the canvas
+        * if not, keeps the player to the far left position */
         if (this.x > 0) {
-            this.x -=  this.width;
+            this.x -=  TILE_WIDTH;
         } else {
             this.x = 0;
         }
@@ -126,33 +120,33 @@ Player.prototype.handleInput = function(key){
     }
 
     if (key === 'right') {
-        // checks if the player's next position is going to be inside the canvas
-        // if not, keeps the player to the far right position
-        if (this.x < 404) {
-            this.x += this.width;
+        /** checks if the player's next position is going to be inside the canvas
+        * if not, keeps the player to the far right position */
+        if (this.x < (CANVAS_WIDTH - TILE_WIDTH)) {
+            this.x += TILE_WIDTH;
         } else {
-            this.x = 404;
+            this.x = (CANVAS_WIDTH - TILE_WIDTH);
         }
         this.update();
     }
 
 
     if (key === 'up') {
-        this.y -= this.height;
+        this.y -= TILE_HEIGHT;
         this.update();
 
-        // if the player gets to the water, wins the game
-        if (this.y < 83) {
+        /** if the player gets to the water, wins the game */
+        if (this.y < TILE_HEIGHT) {
             this.score();
         }
     }
 
 
     if (key === 'down') {
-        // if the player wants to go down makes sure he doesn't
-        // leave the canvas
+        /** if the player wants to go down makes sure he doesn't
+        * leave the canvas */
         if (this.y < this.beginY) {
-            this.y += this.height;
+            this.y += TILE_HEIGHT;
         } else {
             this.y = this.beginY;
         }
@@ -161,16 +155,16 @@ Player.prototype.handleInput = function(key){
 };
 
 
-//**********************************************
-// Numbers of the game
-//**********************************************
+/** **********************************************
+* Numbers of the game
+*************************************************/
 var Game = function() {
     this.score = 0;
     this.level = 1;
 };
 
 
-// Update the score
+/** Update the score */
 Game.prototype.updateScore = function(x) {
 
     this.score = this.score + x;
@@ -180,7 +174,7 @@ Game.prototype.updateScore = function(x) {
 
 };
 
-// Prints the score
+/** Prints the score */
 Game.prototype.printScore = function() {
 
     ctx.fillStyle = "white";
@@ -193,7 +187,7 @@ Game.prototype.printScore = function() {
 
 
 
-// Change the level's game
+/** Change the level's game */
 Game.prototype.changeLevel = function() {
 
     this.level = this.level + 1;
@@ -224,10 +218,10 @@ Game.prototype.changeLevel = function() {
 };
 
 
-// Initializar game, set level, player and enemies
+/**  Initializar game, set level, player and enemies */
 Game.prototype.initGame = function() {
 
-    // clear allEnemies array
+    /** clear allEnemies array */
 
     allEnemies.splice(0,allEnemies.length);
 
@@ -239,14 +233,14 @@ Game.prototype.initGame = function() {
 };
 
 
-// Initializar game, set level, player and enemies
+/** Initializar game, set level, player and enemies */
 Game.prototype.endGame = function() {
 
-    var r = alert("Game Over !!!! Play again ?");
+    alert("Game Over !!!! Play again ?");
     this.initGame();
 };
 
-// Prints the level's game
+/** Prints the level's game */
 Game.prototype.printLevel = function() {
 
     ctx.fillStyle = "white";
@@ -259,7 +253,7 @@ Game.prototype.printLevel = function() {
 
 };
 
-// Prints the score
+/** Prints the score */
 Game.prototype.printNumbers = function() {
 
     this.printScore();
@@ -270,11 +264,10 @@ Game.prototype.printNumbers = function() {
 
 
 
-//**********************************************
-// Now instantiate your objects.
-//**********************************************
+/** *********************************************
+* Now instantiate your objects.
+* **********************************************/
 
-// DEPOIS PASSAR A GERAR NUMEROS RANDOMICOS ENTRE 0 - 505 PARA O X E 50 E 230 PARA O Y.
 
 var winSound = new Audio('sounds/win.wav');
 var colideSound = new Audio('sounds/colide.wav');
@@ -282,6 +275,13 @@ var game = new Game();
 var allEnemies = [];
 var player = new Player();
 
+/** Size of the images for Enemies and Player */
+var TILE_WIDTH = 101;
+var TILE_HEIGHT = 83;
+
+/** Canvas size */
+var CANVAS_WIDTH = 505;
+var CANVAS_HEIGHT = 606;
 
 
 
@@ -290,8 +290,8 @@ game.initGame();
 
 
 
-// This listens for key presses and sends the keys to your
-// Player.handleInput() method. You don't need to modify this.
+/**This listens for key presses and sends the keys to your
+* Player.handleInput() method. You don't need to modify this. */
 document.addEventListener('keydown', function(e) {
     var allowedKeys = {
         37: 'left',
